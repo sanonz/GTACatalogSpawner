@@ -1,0 +1,240 @@
+# Catalog Spawner 人物、武器、载具配置手册
+
+本文说明如何配置 Catalog Spawner 的人物、武器和载具菜单。
+
+## 配置目录
+
+插件从 GTA V 根目录下的 `CatalogSpawner` 文件夹读取配置：
+
+```text
+Grand Theft Auto V/
+├─ CatalogSpawner.asi
+└─ CatalogSpawner/
+   ├─ peds.xml
+   ├─ weapons.xml
+   ├─ vehicles.xml
+   └─ Previews/
+      ├─ noimage.png
+      ├─ Peds/
+      ├─ Weapons/
+      └─ Vehicles/
+```
+
+默认 Steam 安装位置示例：
+
+```text
+C:\Program Files (x86)\Steam\steamapps\common\Grand Theft Auto V\CatalogSpawner
+```
+
+三个 XML 文件建议保存为 UTF-8 编码。修改配置后，关闭菜单并按 `F6` 重新打开，插件会重新读取三个列表，无需重启游戏。
+
+## 通用 XML 结构
+
+每份文件由一个 `<catalog>` 根节点和若干个 `<item>` 节点组成：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog type="ped">
+  <item>
+    <displayName>菜单展示名称</displayName>
+    <spawnName>实际调用名称</spawnName>
+    <preview>Previews/Peds/example.png</preview>
+    <category>分类</category>
+    <description>说明文字</description>
+    <info label="作者" value="Example" />
+  </item>
+</catalog>
+```
+
+通用字段：
+
+| 字段 | 是否必填 | 说明 |
+| --- | --- | --- |
+| `displayName` | 是 | 菜单中显示的名称，可以使用中文。 |
+| `spawnName` | 是 | 传给 GTA V 的人物模型名、武器名或载具模型名。 |
+| `preview` | 否 | 右侧预览图路径，建议使用相对于 `CatalogSpawner` 目录的路径。 |
+| `category` | 否 | 右侧显示的分类。 |
+| `description` | 否 | 右侧显示的简介。 |
+| `info` | 否 | 自定义信息，可添加多行；`label` 和 `value` 均不能为空。 |
+
+注意事项：
+
+- `peds.xml`、`weapons.xml`、`vehicles.xml` 的 `type` 应分别为 `ped`、`weapon`、`vehicle`。
+- 每个 `<item>` 必须直接位于 `<catalog>` 下，字段必须直接位于 `<item>` 下，不支持嵌套字段。
+- 同一文件中的 `spawnName` 不区分大小写去重，重复项会被忽略。
+- `displayName` 和 `spawnName` 为空的条目会被忽略。
+- XML 特殊字符必须转义：`&` 写成 `&amp;`，`<` 写成 `&lt;`，`>` 写成 `&gt;`。
+- 配置条目只负责列出资源，不会安装人物、武器或载具 MOD；相应资源必须已正确安装到游戏中。
+
+## 人物配置：peds.xml
+
+根节点类型必须为 `ped`。选择人物后，当前主角会切换成对应人物模型。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog type="ped">
+  <item>
+    <displayName>维托·黑手党</displayName>
+    <spawnName>vito_mafia</spawnName>
+    <preview>Previews/Peds/vito_mafia.png</preview>
+    <category>男性</category>
+    <description>Add-On 人物</description>
+    <info label="作者" value="示例作者" />
+  </item>
+
+  <item>
+    <displayName>超人</displayName>
+    <spawnName>superman</spawnName>
+    <preview>Previews/Peds/superman.jpg</preview>
+    <category>男性</category>
+    <description>超级英雄人物</description>
+  </item>
+</catalog>
+```
+
+如果人物由 AddonPeds 管理，可以在 `ap_m.xml` 中找到该人物的 `Name`，并将其原样填写到 `spawnName`：
+
+```xml
+<!-- ap_m.xml 中的名称 -->
+<Name>vito_mafia</Name>
+
+<!-- peds.xml 中对应填写 -->
+<spawnName>vito_mafia</spawnName>
+```
+
+Catalog Spawner 当前不会直接读取或修改 `ap_m.xml`。如果选择后提示人物模型不存在，请先确认人物 MOD 已注册并能被游戏加载，同时检查 `spawnName` 拼写。
+
+切换人物会替换玩家 Ped，并应用该模型的默认组件。生命值、护甲、武器和自定义服装不会被专门保留。
+
+## 武器配置：weapons.xml
+
+根节点类型必须为 `weapon`。选择武器后，当前主角会获得并立即装备该武器。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog type="weapon">
+  <item>
+    <displayName>手枪</displayName>
+    <spawnName>WEAPON_PISTOL</spawnName>
+    <preview>Previews/Weapons/pistol.png</preview>
+    <category>手枪</category>
+    <description>游戏原版半自动手枪</description>
+    <ammo>120</ammo>
+  </item>
+
+  <item>
+    <displayName>MG42</displayName>
+    <spawnName>WEAPON_MG42</spawnName>
+    <preview>Previews/Weapons/mg42.png</preview>
+    <category>机枪</category>
+    <description>Add-On 武器</description>
+    <ammo>300</ammo>
+    <info label="弹药类型" value="7.92 mm" />
+  </item>
+</catalog>
+```
+
+武器专用字段：
+
+| 字段 | 是否必填 | 说明 |
+| --- | --- | --- |
+| `ammo` | 否 | 给予的弹药数量，必须是大于或等于 `0` 的整数；省略或无效时默认为 `300`。 |
+
+原版武器名称通常使用 `WEAPON_` 前缀。Add-On 武器必须填写其 MOD 实际注册的武器名称。无效武器仍会显示在菜单中，但选择时会提示武器无效。
+
+## 载具配置：vehicles.xml
+
+根节点类型必须为 `vehicle`。选择载具后，插件会在玩家右侧生成对应载具；是否自动进入驾驶位由设置菜单中的“生成载具后自动进入”控制。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog type="vehicle">
+  <item>
+    <displayName>Adder</displayName>
+    <spawnName>adder</spawnName>
+    <preview>Previews/Vehicles/adder.png</preview>
+    <category>超级跑车</category>
+    <description>游戏原版超级跑车</description>
+  </item>
+
+  <item>
+    <displayName>日产 GTR</displayName>
+    <spawnName>gtr</spawnName>
+    <preview>Previews/Vehicles/gtr.jpg</preview>
+    <category>跑车</category>
+    <description>Add-On 载具</description>
+    <info label="品牌" value="Nissan" />
+    <info label="年份" value="2024" />
+  </item>
+</catalog>
+```
+
+`spawnName` 必须是载具 MOD 定义的实际模型名称，而不是安装包名称、文件夹名称或菜单展示名称。无效载具仍会显示在菜单中，但选择时会提示模型不存在。
+
+## 预览图
+
+推荐按类型存放预览图：
+
+```text
+CatalogSpawner/Previews/Peds/
+CatalogSpawner/Previews/Weapons/
+CatalogSpawner/Previews/Vehicles/
+```
+
+配置示例：
+
+```xml
+<preview>Previews/Vehicles/gtr.png</preview>
+```
+
+- 支持识别 PNG、JPEG/JPG 和 WebP 图片尺寸，建议优先使用 PNG 或 JPG。
+- 图片不存在或路径为空时，会使用 `Previews/noimage.png`。
+- Windows 路径也可使用反斜杠，但推荐统一使用 `/`，便于阅读和迁移。
+- 建议所有预览图使用相近的宽高比，例如 `16:9`。
+
+## 自定义基础信息
+
+可以在任意条目中添加多个 `<info />` 节点，它们会显示在右侧信息面板：
+
+```xml
+<info label="作者" value="Sanonz" />
+<info label="版本" value="1.2" />
+<info label="来源" value="自定义 MOD" />
+```
+
+`info` 必须使用属性形式，不能写成嵌套节点。
+
+## 修改和排错
+
+1. 保存 XML 文件。
+2. 在游戏中关闭 Catalog Spawner 菜单。
+3. 按 `F6` 重新打开菜单，触发配置重新加载。
+4. 如果列表仍为空或选择项目失败，查看 GTA V 根目录下的：
+
+```text
+GTAVCatalogSpawner.log
+```
+
+正常加载日志示例：
+
+```text
+[Catalog] Loaded 2 item(s) from peds.xml
+[Catalog] Loaded 2 item(s) from weapons.xml
+[Catalog] Loaded 2 item(s) from vehicles.xml
+```
+
+常见日志和处理方式：
+
+| 日志内容 | 原因与处理方式 |
+| --- | --- |
+| `Failed to open` | 文件不存在、文件名错误，或文件正被其他程序独占。 |
+| `Invalid catalog` | XML 结构或结束标签错误，使用 XML 编辑器检查格式。 |
+| `Type ... doesn't match file` | 根节点 `type` 与文件类型不一致。 |
+| `Ignoring item without displayName/spawnName` | 条目缺少必填字段。 |
+| `Ignoring duplicate spawnName` | 同一文件中存在重复的实际调用名称。 |
+| `Invalid ped model` | 人物模型未安装、未注册或 `spawnName` 错误。 |
+| `Invalid weapon` | 武器名称无效或 Add-On 武器未加载。 |
+| `Invalid vehicle model` | 载具模型未安装、未加载或 `spawnName` 错误。 |
+| `Image not found` | `preview` 指向的图片不存在，会改用默认图。 |
+
+如果某份配置在游戏已经成功加载过，之后修改成无效 XML，插件会保留该文件上一次成功加载的内存列表；首次加载即失败时，对应菜单为空。

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog type="ped">
+  <item>
+    <displayName>Vito Mafia</displayName>
+    <spawnName>vito_mafia</spawnName>
+    <preview>Previews/Peds/vito_mafia.png</preview>
+    <category>Male</category>
+    <description>Add-on ped</description>
+  </item>
+  <item>
+    <displayName>Superman</displayName>
+    <spawnName>superman</spawnName>
+    <preview>Previews/Peds/superman.png</preview>
+    <category>Male</category>
+    <description>Add-on ped</description>
+  </item>
+</catalog>
+

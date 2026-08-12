@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog type="weapon">
+  <item>
+    <displayName>Pistol</displayName>
+    <spawnName>WEAPON_PISTOL</spawnName>
+    <preview>Previews/Weapons/pistol.png</preview>
+    <category>Handgun</category>
+    <description>Standard semi-automatic pistol</description>
+    <ammo>120</ammo>
+  </item>
+  <item>
+    <displayName>Carbine Rifle</displayName>
+    <spawnName>WEAPON_CARBINERIFLE</spawnName>
+    <preview>Previews/Weapons/carbine-rifle.png</preview>
+    <category>Rifle</category>
+    <description>Standard carbine rifle</description>
+    <ammo>300</ammo>
+  </item>
+</catalog>
+

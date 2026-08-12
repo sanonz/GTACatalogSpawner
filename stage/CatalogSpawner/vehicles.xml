@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog type="vehicle">
+  <item>
+    <displayName>Adder</displayName>
+    <spawnName>adder</spawnName>
+    <preview>Previews/Vehicles/adder.png</preview>
+    <category>Super</category>
+    <description>Base-game supercar</description>
+  </item>
+  <item>
+    <displayName>Zentorno</displayName>
+    <spawnName>zentorno</spawnName>
+    <preview>Previews/Vehicles/zentorno.png</preview>
+    <category>Super</category>
+    <description>High-performance supercar</description>
+  </item>
+</catalog>
+

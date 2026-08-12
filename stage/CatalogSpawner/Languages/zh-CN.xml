@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language code="zh-CN" name="简体中文">
+  <text key="menu.main.title">自定义生成器</text>
+  <text key="menu.main.peds">人物</text>
+  <text key="menu.main.weapons">武器</text>
+  <text key="menu.main.vehicles">载具</text>
+  <text key="menu.main.settings">设置</text>
+  <text key="menu.peds.title">人物</text>
+  <text key="menu.weapons.title">武器</text>
+  <text key="menu.vehicles.title">载具</text>
+  <text key="menu.settings.title">设置</text>
+  <text key="menu.empty">没有配置项目</text>
+  <text key="menu.empty.detail">请编辑对应的 XML 目录文件，然后重新打开菜单。</text>
+  <text key="menu.item_count">共 {count} 项</text>
+  <text key="footer.brand">sanonz</text>
+  <text key="settings.language">语言</text>
+  <text key="settings.enter_vehicle">刷出载具后自动进入</text>
+  <text key="settings.enter_vehicle.detail">载具刷出后，将当前主角放入驾驶位。</text>
+  <text key="info.ped.title">人物信息</text>
+  <text key="info.weapon.title">武器信息</text>
+  <text key="info.vehicle.title">载具信息</text>
+  <text key="info.spawn_name">调用名：{value}</text>
+  <text key="info.hash">哈希：{value}</text>
+  <text key="info.category">分类：{value}</text>
+  <text key="info.description">说明：{value}</text>
+  <text key="info.ammo">弹药：{value}</text>
+  <text key="info.damage">基础伤害：{value}</text>
+  <text key="info.clip_size">弹匣容量：{value}</text>
+  <text key="info.make">厂商：{value}</text>
+  <text key="info.game_name">游戏名称：{value}</text>
+  <text key="info.vehicle_class">类别：{value}</text>
+  <text key="common.none">无</text>
+  <text key="common.unknown">未知</text>
+  <text key="subtitle.model_load_failed">无法加载模型：{model}</text>
+  <text key="subtitle.ped_missing">人物模型不存在：{model}</text>
+  <text key="subtitle.ped_switched">已将当前主角切换为{name}</text>
+  <text key="subtitle.weapon_invalid">武器不存在：{model}</text>
+  <text key="subtitle.weapon_given">已获得{name}</text>
+  <text key="subtitle.vehicle_missing">载具不存在：{model}</text>
+  <text key="subtitle.vehicle_create_failed">无法创建载具：{model}</text>
+  <text key="subtitle.vehicle_spawned">已刷出{name}</text>
+</language>

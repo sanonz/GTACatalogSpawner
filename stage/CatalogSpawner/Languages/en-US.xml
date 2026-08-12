@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language code="en-US" name="English">
+  <text key="menu.main.title">Catalog Spawner</text>
+  <text key="menu.main.peds">Peds</text>
+  <text key="menu.main.weapons">Weapons</text>
+  <text key="menu.main.vehicles">Vehicles</text>
+  <text key="menu.main.settings">Settings</text>
+  <text key="menu.peds.title">Peds</text>
+  <text key="menu.weapons.title">Weapons</text>
+  <text key="menu.vehicles.title">Vehicles</text>
+  <text key="menu.settings.title">Settings</text>
+  <text key="menu.empty">No configured items</text>
+  <text key="menu.empty.detail">Edit the corresponding XML catalog and reopen the menu.</text>
+  <text key="menu.item_count">{count} item(s)</text>
+  <text key="footer.brand">sanonz</text>
+  <text key="settings.language">Language</text>
+  <text key="settings.enter_vehicle">Enter spawned vehicle</text>
+  <text key="settings.enter_vehicle.detail">Put the current player into the driver seat after spawning a vehicle.</text>
+  <text key="info.ped.title">Ped info</text>
+  <text key="info.weapon.title">Weapon info</text>
+  <text key="info.vehicle.title">Vehicle info</text>
+  <text key="info.spawn_name">Spawn name: {value}</text>
+  <text key="info.hash">Hash: {value}</text>
+  <text key="info.category">Category: {value}</text>
+  <text key="info.description">Description: {value}</text>
+  <text key="info.ammo">Ammo: {value}</text>
+  <text key="info.damage">Base damage: {value}</text>
+  <text key="info.clip_size">Clip size: {value}</text>
+  <text key="info.make">Make: {value}</text>
+  <text key="info.game_name">Game name: {value}</text>
+  <text key="info.vehicle_class">Class: {value}</text>
+  <text key="common.none">None</text>
+  <text key="common.unknown">Unknown</text>
+  <text key="subtitle.model_load_failed">Couldn't load model: {model}</text>
+  <text key="subtitle.ped_missing">Ped model doesn't exist: {model}</text>
+  <text key="subtitle.ped_switched">Player model changed to {name}</text>
+  <text key="subtitle.weapon_invalid">Weapon doesn't exist: {model}</text>
+  <text key="subtitle.weapon_given">Received {name}</text>
+  <text key="subtitle.vehicle_missing">Vehicle doesn't exist: {model}</text>
+  <text key="subtitle.vehicle_create_failed">Couldn't create vehicle: {model}</text>
+  <text key="subtitle.vehicle_spawned">Spawned {name}</text>
+</language>
