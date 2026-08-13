@@ -6,6 +6,7 @@
 #include "Logger.h"
 #include "Paths.h"
 #include "ScriptMenu.h"
+#include "SceneLoader.h"
 #include "Settings.h"
 
 #include <inc/main.h>
@@ -39,8 +40,8 @@ void InitializeScript() {
 void ScriptMain() {
     InitializeScript();
     while (true) {
+        SceneLoader::Tick();
         UpdateMenu();
         WAIT(0);
     }
 }
-

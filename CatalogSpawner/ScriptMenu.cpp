@@ -5,6 +5,7 @@
 #include "ImageCache.h"
 #include "Language.h"
 #include "Script.h"
+#include "SceneLoader.h"
 #include "Settings.h"
 #include "Spawner.h"
 #include "Utils.h"
@@ -15,9 +16,13 @@
 #include <algorithm>
 #include <format>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace {
+std::unordered_map<std::string, SceneLoader::PreflightResult>
+    gScenePreflightCache;
+
 std::string T(const char* key) {
     return gLanguage.Text(key);
 }
@@ -64,6 +69,7 @@ std::string InfoTitle(CatalogKind kind) {
     case CatalogKind::Ped: return T("info.ped.title");
     case CatalogKind::Weapon: return T("info.weapon.title");
     case CatalogKind::Vehicle: return T("info.vehicle.title");
+    case CatalogKind::Scene: return T("info.scene.title");
     }
     return {};
 }
@@ -78,8 +84,10 @@ std::vector<std::string> BuildDetails(const CatalogItem& item) {
     if (!preview.empty())
         details.push_back(preview);
 
-    details.push_back(gLanguage.Format("info.spawn_name", { { "value", item.SpawnName } }));
-    details.push_back(gLanguage.Format("info.hash", { { "value", Utils::HexHash(item.ModelHash()) } }));
+    if (item.Kind != CatalogKind::Scene) {
+        details.push_back(gLanguage.Format("info.spawn_name", { { "value", item.SpawnName } }));
+        details.push_back(gLanguage.Format("info.hash", { { "value", Utils::HexHash(item.ModelHash()) } }));
+    }
     if (!item.Category.empty())
         details.push_back(gLanguage.Format("info.category", { { "value", item.Category } }));
     if (!item.Description.empty())
@@ -132,6 +140,44 @@ std::vector<std::string> BuildDetails(const CatalogItem& item) {
     return details;
 }
 
+const SceneLoader::PreflightResult& ScenePreflight(const CatalogItem& scene) {
+    const std::string key = scene.ScenePath.lexically_normal().string();
+    const auto existing = gScenePreflightCache.find(key);
+    if (existing != gScenePreflightCache.end())
+        return existing->second;
+    return gScenePreflightCache.emplace(key,
+        SceneLoader::Preflight(scene.ScenePath)).first->second;
+}
+
+std::vector<std::string> BuildSceneDetails(const CatalogItem& scene,
+    const SceneLoader::PreflightResult& preflight) {
+    std::vector<std::string> details = BuildDetails(scene);
+    if (!details.empty())
+        details.pop_back();
+
+    if (!preflight.Valid) {
+        details.emplace_back(" ");
+        details.push_back(T("menu.scene.invalid"));
+        if (!preflight.Error.empty())
+            details.push_back(preflight.Error);
+    }
+    else if (preflight.Destructive) {
+        details.emplace_back(" ");
+        details.push_back(T("menu.scene.destructive_warning"));
+        if (preflight.ClearDatabase)
+            details.push_back(T("menu.scene.clear_database"));
+        if (preflight.ClearMarkers)
+            details.push_back(T("menu.scene.clear_markers"));
+        if (preflight.ClearWorldRadius > 0.0f)
+            details.push_back(gLanguage.Format("menu.scene.clear_world", {
+                { "radius", std::format("{:.1f}", preflight.ClearWorldRadius) },
+            }));
+    }
+
+    details.emplace_back(" ");
+    return details;
+}
+
 void AddItem(const CatalogItem& item) {
     bool highlighted = false;
     if (gMenu.OptionPlus(item.DisplayName, {}, &highlighted, nullptr, nullptr,
@@ -145,6 +191,9 @@ void AddItem(const CatalogItem& item) {
             break;
         case CatalogKind::Vehicle:
             Spawner::SpawnVehicle(item, gSettings.EnterSpawnedVehicle);
+            break;
+        case CatalogKind::Scene:
+            SceneLoader::Load(item.ScenePath, item.DisplayName);
             break;
         }
     }
@@ -175,7 +224,72 @@ void UpdateMainMenu() {
     gMenu.MenuOption(T("menu.main.peds"), "pedsmenu");
     gMenu.MenuOption(T("menu.main.weapons"), "weaponsmenu");
     gMenu.MenuOption(T("menu.main.vehicles"), "vehiclesmenu");
+    gMenu.MenuOption(T("menu.main.scenes"), "scenesmenu");
     gMenu.MenuOption(T("menu.main.settings"), "settingsmenu");
+}
+
+void UpdateScenesMenu() {
+    const auto& scenes = gCatalogs.Scenes();
+    gMenu.Title(T("menu.scenes.title"));
+    gMenu.Subtitle(gLanguage.Format("menu.item_count", {
+        { "count", std::to_string(scenes.size()) },
+    }));
+    const auto sessions = SceneLoader::ActiveSessions();
+    if (!sessions.empty())
+        gMenu.MenuOption(gLanguage.Format("menu.scenes.active", {
+            { "count", std::to_string(sessions.size()) },
+        }), "scenesessionsmenu");
+    if (scenes.empty()) {
+        AddEmptyState();
+        return;
+    }
+    for (const auto& scene : scenes) {
+        bool highlighted = false;
+        const bool selected = gMenu.OptionPlus(scene.DisplayName, {}, &highlighted,
+            nullptr, nullptr, InfoTitle(CatalogKind::Scene));
+        if (!highlighted && !selected)
+            continue;
+
+        const auto& preflight = ScenePreflight(scene);
+        if (highlighted)
+            gMenu.OptionPlusPlus(BuildSceneDetails(scene, preflight),
+                InfoTitle(CatalogKind::Scene));
+        if (selected) {
+            if (preflight.Valid)
+                SceneLoader::Load(scene.ScenePath, scene.DisplayName);
+            else
+                Utils::ShowSubtitle(gLanguage.Format("subtitle.scene_invalid", {
+                    { "name", scene.DisplayName },
+                }));
+        }
+    }
+}
+
+void UpdateSceneSessionsMenu() {
+    const auto sessions = SceneLoader::ActiveSessions();
+    gMenu.Title(T("menu.scenes.active_title"));
+    gMenu.Subtitle(gLanguage.Format("menu.item_count", {
+        { "count", std::to_string(sessions.size()) },
+    }));
+    if (sessions.empty()) {
+        gMenu.Option(T("menu.scenes.none_active"));
+        return;
+    }
+    if (gMenu.Option(gLanguage.Format("menu.scenes.unload", {
+        { "count", std::to_string(SceneLoader::LoadedEntityCount()) },
+    }))) SceneLoader::UnloadAll();
+    for (const auto& session : sessions) {
+        if (gMenu.Option(gLanguage.Format("menu.scenes.unload_one", {
+            { "name", session.Name },
+            { "count", std::to_string(session.EntityCount) },
+        }), session.FailureCount > 0 ? std::vector<std::string>{
+            gLanguage.Format("menu.scenes.failures", {
+                { "count", std::to_string(session.FailureCount) },
+            })
+        } : std::vector<std::string>{})) {
+            SceneLoader::Unload(session.Id);
+        }
+    }
 }
 
 void UpdateSettingsMenu() {
@@ -206,6 +320,7 @@ void UpdateSettingsMenu() {
 }
 
 void OnMenuOpen() {
+    gScenePreflightCache.clear();
     ReloadUserData();
 }
 
@@ -217,7 +332,7 @@ void UpdateMenu() {
     int footerOptionCount = 0;
     if (gMenu.CurrentMenu("mainmenu")) {
         UpdateMainMenu();
-        footerOptionCount = 4;
+        footerOptionCount = 5;
     }
     if (gMenu.CurrentMenu("pedsmenu")) {
         UpdateCatalogMenu("menu.peds.title", gCatalogs.Peds());
@@ -230,6 +345,16 @@ void UpdateMenu() {
     if (gMenu.CurrentMenu("vehiclesmenu")) {
         UpdateCatalogMenu("menu.vehicles.title", gCatalogs.Vehicles());
         footerOptionCount = std::max(1, static_cast<int>(gCatalogs.Vehicles().size()));
+    }
+    if (gMenu.CurrentMenu("scenesmenu")) {
+        UpdateScenesMenu();
+        footerOptionCount = std::max(1, static_cast<int>(gCatalogs.Scenes().size()) +
+            (!SceneLoader::ActiveSessions().empty() ? 1 : 0));
+    }
+    if (gMenu.CurrentMenu("scenesessionsmenu")) {
+        UpdateSceneSessionsMenu();
+        footerOptionCount = std::max(1,
+            static_cast<int>(SceneLoader::ActiveSessions().size()) + 1);
     }
     if (gMenu.CurrentMenu("settingsmenu")) {
         UpdateSettingsMenu();

@@ -4,10 +4,27 @@
   <text key="menu.main.peds">人物</text>
   <text key="menu.main.weapons">武器</text>
   <text key="menu.main.vehicles">载具</text>
+  <text key="menu.main.scenes">场景</text>
   <text key="menu.main.settings">设置</text>
   <text key="menu.peds.title">人物</text>
   <text key="menu.weapons.title">武器</text>
   <text key="menu.vehicles.title">载具</text>
+  <text key="menu.scenes.title">场景</text>
+  <text key="menu.scenes.unload">卸载已加载场景（{count} 个实体）</text>
+  <text key="menu.scenes.active">已加载场景（{count} 个）</text>
+  <text key="menu.scenes.active_title">已加载场景</text>
+  <text key="menu.scenes.none_active">当前没有已加载场景</text>
+  <text key="menu.scenes.unload_one">卸载{name}（{count} 个实体）</text>
+  <text key="menu.scenes.failures">加载失败：{count} 项</text>
+  <text key="menu.scene.no_selection">尚未选择场景</text>
+  <text key="menu.scene.invalid">场景 XML 无效</text>
+  <text key="menu.scene.ready">确认后加载此场景</text>
+  <text key="menu.scene.destructive_warning">警告：检测到破坏性指令，直接加载时将忽略</text>
+  <text key="menu.scene.clear_database">ClearDatabase：已忽略（原本会卸载全部 Catalog Spawner 场景）</text>
+  <text key="menu.scene.clear_markers">ClearMarkers：已忽略（原本会清除活动标记）</text>
+  <text key="menu.scene.clear_world">ClearWorld：已忽略（原本会清除 {radius} 单位半径内的世界实体）</text>
+  <text key="menu.scene.load">加载场景</text>
+  <text key="menu.scene.confirm_load">确认并加载场景</text>
   <text key="menu.settings.title">设置</text>
   <text key="menu.empty">没有配置项目</text>
   <text key="menu.empty.detail">请编辑对应的 XML 目录文件，然后重新打开菜单。</text>
@@ -19,6 +36,8 @@
   <text key="info.ped.title">人物信息</text>
   <text key="info.weapon.title">武器信息</text>
   <text key="info.vehicle.title">载具信息</text>
+  <text key="info.scene.title">场景信息</text>
+  <text key="info.scene_path">场景文件：{value}</text>
   <text key="info.spawn_name">调用名：{value}</text>
   <text key="info.hash">哈希：{value}</text>
   <text key="info.category">分类：{value}</text>
@@ -31,6 +50,7 @@
   <text key="info.vehicle_class">类别：{value}</text>
   <text key="common.none">无</text>
   <text key="common.unknown">未知</text>
+  <text key="common.back">返回</text>
   <text key="subtitle.model_load_failed">无法加载模型：{model}</text>
   <text key="subtitle.ped_missing">人物模型不存在：{model}</text>
   <text key="subtitle.ped_switched">已将当前主角切换为{name}</text>
@@ -39,4 +59,7 @@
   <text key="subtitle.vehicle_missing">载具不存在：{model}</text>
   <text key="subtitle.vehicle_create_failed">无法创建载具：{model}</text>
   <text key="subtitle.vehicle_spawned">已刷出{name}</text>
+  <text key="subtitle.scene_invalid">无法读取场景：{name}</text>
+  <text key="subtitle.scene_loaded">已加载{name}：成功 {loaded} 个，失败 {failed} 个</text>
+  <text key="subtitle.scenes_unloaded">已卸载 {count} 个场景实体</text>
 </language>

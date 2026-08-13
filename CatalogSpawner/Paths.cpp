@@ -38,10 +38,15 @@ bool Paths::EnsureDataDirectories() {
         std::filesystem::create_directories(DataDirectory() / L"Previews" / L"Weapons", error);
     if (!error)
         std::filesystem::create_directories(DataDirectory() / L"Previews" / L"Vehicles", error);
+    if (!error)
+        std::filesystem::create_directories(DataDirectory() / L"Previews" / L"Scenes", error);
+    if (!error)
+        std::filesystem::create_directories(DataDirectory() / L"Scenes", error);
+    if (!error)
+        std::filesystem::create_directories(DataDirectory() / L"Audio", error);
     if (error) {
         LOG_ERROR("Failed to create data directories: {}", error.message());
         return false;
     }
     return true;
 }
-

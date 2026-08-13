@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog type="scene">
+  <item>
+    <displayName>路锥示例场景</displayName>
+    <scenePath>Scenes/road_cones.xml</scenePath>
+    <preview>Previews/Scenes/road_cones.png</preview>
+    <category>示例</category>
+    <description>加载两个使用 Menyoo Placement 格式摆放的路锥。</description>
+    <info label="格式" value="Menyoo Spooner XML" />
+  </item>
+</catalog>

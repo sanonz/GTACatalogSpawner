@@ -67,7 +67,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)thirdparty\ScriptHookV_SDK\lib\ScriptHookV.lib;xmllite.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)thirdparty\ScriptHookV_SDK\lib\ScriptHookV.lib;xmllite.lib;Shlwapi.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -89,7 +89,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(SolutionDir)thirdparty\ScriptHookV_SDK\lib\ScriptHookV.lib;xmllite.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)thirdparty\ScriptHookV_SDK\lib\ScriptHookV.lib;xmllite.lib;Shlwapi.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -110,6 +110,9 @@
     <ClCompile Include="Paths.cpp" />
     <ClCompile Include="Script.cpp" />
     <ClCompile Include="ScriptMenu.cpp" />
+    <ClCompile Include="SceneLoader.cpp" />
+    <ClCompile Include="SceneTasks.cpp" />
+    <ClCompile Include="SceneXml.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Spawner.cpp" />
     <ClCompile Include="Utils.cpp" />
@@ -123,6 +126,9 @@
     <ClInclude Include="Paths.h" />
     <ClInclude Include="Script.h" />
     <ClInclude Include="ScriptMenu.h" />
+    <ClInclude Include="SceneLoader.h" />
+    <ClInclude Include="SceneTasks.h" />
+    <ClInclude Include="SceneXml.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Spawner.h" />
     <ClInclude Include="Utils.h" />

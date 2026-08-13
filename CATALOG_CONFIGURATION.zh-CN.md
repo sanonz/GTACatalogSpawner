@@ -1,6 +1,6 @@
-# Catalog Spawner 人物、武器、载具配置手册
+# Catalog Spawner 人物、武器、载具、场景配置手册
 
-本文说明如何配置 Catalog Spawner 的人物、武器和载具菜单。
+本文说明如何配置 Catalog Spawner 的人物、武器、载具和场景菜单。
 
 ## 配置目录
 
@@ -13,11 +13,14 @@ Grand Theft Auto V/
    ├─ peds.xml
    ├─ weapons.xml
    ├─ vehicles.xml
+   ├─ scenes.xml
+   ├─ Scenes/
    └─ Previews/
       ├─ noimage.png
       ├─ Peds/
       ├─ Weapons/
-      └─ Vehicles/
+      ├─ Vehicles/
+      └─ Scenes/
 ```
 
 默认 Steam 安装位置示例：
@@ -26,7 +29,7 @@ Grand Theft Auto V/
 C:\Program Files (x86)\Steam\steamapps\common\Grand Theft Auto V\CatalogSpawner
 ```
 
-三个 XML 文件建议保存为 UTF-8 编码。修改配置后，关闭菜单并按 `F6` 重新打开，插件会重新读取三个列表，无需重启游戏。
+四个目录 XML 文件建议保存为 UTF-8 编码。修改配置后，关闭菜单并按 `F6` 重新打开，插件会重新读取四个列表，无需重启游戏。
 
 ## 通用 XML 结构
 
@@ -51,7 +54,7 @@ C:\Program Files (x86)\Steam\steamapps\common\Grand Theft Auto V\CatalogSpawner
 | 字段 | 是否必填 | 说明 |
 | --- | --- | --- |
 | `displayName` | 是 | 菜单中显示的名称，可以使用中文。 |
-| `spawnName` | 是 | 传给 GTA V 的人物模型名、武器名或载具模型名。 |
+| `spawnName` | 人物/武器/载具必填 | 传给 GTA V 的人物模型名、武器名或载具模型名；场景条目改用 `scenePath`。 |
 | `preview` | 否 | 右侧预览图路径，建议使用相对于 `CatalogSpawner` 目录的路径。 |
 | `category` | 否 | 右侧显示的分类。 |
 | `description` | 否 | 右侧显示的简介。 |
@@ -59,10 +62,10 @@ C:\Program Files (x86)\Steam\steamapps\common\Grand Theft Auto V\CatalogSpawner
 
 注意事项：
 
-- `peds.xml`、`weapons.xml`、`vehicles.xml` 的 `type` 应分别为 `ped`、`weapon`、`vehicle`。
+- `peds.xml`、`weapons.xml`、`vehicles.xml`、`scenes.xml` 的 `type` 应分别为 `ped`、`weapon`、`vehicle`、`scene`。
 - 每个 `<item>` 必须直接位于 `<catalog>` 下，字段必须直接位于 `<item>` 下，不支持嵌套字段。
-- 同一文件中的 `spawnName` 不区分大小写去重，重复项会被忽略。
-- `displayName` 和 `spawnName` 为空的条目会被忽略。
+- 人物、武器、载具文件按 `spawnName` 去重，场景文件按 `scenePath` 去重，均不区分大小写。
+- `displayName` 为空的条目会被忽略；普通条目还要求 `spawnName`，场景条目要求 `scenePath`。
 - XML 特殊字符必须转义：`&` 写成 `&amp;`，`<` 写成 `&lt;`，`>` 写成 `&gt;`。
 - 配置条目只负责列出资源，不会安装人物、武器或载具 MOD；相应资源必须已正确安装到游戏中。
 
@@ -171,6 +174,50 @@ Catalog Spawner 当前不会直接读取或修改 `ap_m.xml`。如果选择后�
 
 `spawnName` 必须是载具 MOD 定义的实际模型名称，而不是安装包名称、文件夹名称或菜单展示名称。无效载具仍会显示在菜单中，但选择时会提示模型不存在。
 
+## 场景配置：scenes.xml
+
+根节点类型必须为 `scene`。场景目录项使用 `scenePath` 代替 `spawnName`，选择后先进入加载确认页，再读取指定的本地 Menyoo Spooner XML。仅支持当前 Menyoo 的 `<SpoonerPlacements>` XML，不支持旧版 `.SP00N`。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog type="scene">
+  <item>
+    <displayName>屋顶聚会</displayName>
+    <scenePath>Scenes/rooftop_party.xml</scenePath>
+    <preview>Previews/Scenes/rooftop_party.png</preview>
+    <category>聚会</category>
+    <description>在屋顶摆放人物、载具和道具。</description>
+    <info label="作者" value="Example" />
+  </item>
+</catalog>
+```
+
+场景字段：
+
+| 字段 | 是否必填 | 说明 |
+| --- | --- | --- |
+| `displayName` | 是 | 场景在菜单中显示的名称。 |
+| `scenePath` | 是 | Menyoo Spooner XML 路径；相对路径以 `CatalogSpawner` 目录为基准，也可使用绝对路径。 |
+| `preview` | 否 | 场景预览图，建议放在 `Previews/Scenes`。 |
+| `category` | 否 | 右侧显示的场景分类。 |
+| `description` | 否 | 右侧显示的场景介绍。 |
+| `info` | 否 | 与其他目录相同的自定义信息。 |
+
+场景加载器支持：
+
+- `Type=1` 人物、`Type=2` 载具、`Type=3` 物体及其当前 Menyoo 常用属性，包括外观、改装、状态、证明属性和实体 Attachment。
+- Marker 及传送目标、Placement 循环 PTFX、Note、AudioFile。
+- `IPLsToRemove`、`IPLsToLoad`、`InteriorsToEnable`、`InteriorsToCap`、`WeatherToSet`、`TimecycleModifier`、`ImgLoadingCoords` 和 `ReferenceCoords`。
+- 当前 Menyoo TaskSequence 的全部类型编号 `0–54`，并读取 `Duration`、`KeepTaskRunningAfterTime` 与 `IsLoopedTask`。
+
+如果某个模型、附件目标、PTFX 或音频加载失败，插件会继续加载其余内容，成功部分不会回滚；完成提示及“已加载场景”菜单会显示失败数量。
+
+`ClearWorld`、`ClearDatabase` 和 `ClearMarkers` 属于破坏性指令。场景确认页会逐项列出，只有再次选择“确认并加载场景”才会执行。其中 `ClearDatabase`/`ClearMarkers` 只清理由 Catalog Spawner 跟踪的场景会话和 Marker；`ClearWorld` 会调用游戏世界清理原语，造成的删除无法在卸载时恢复。
+
+可以同时加载多个场景。“已加载场景”菜单支持按场景卸载或全部卸载。卸载会尽力删除该会话记录的实体、任务、Blip、循环 PTFX、Marker 和音频，但不会恢复天气、Timecycle、IPL、Interior、玩家原位置或 `ClearWorld` 已删除的世界实体。多个场景修改全局状态时，以最后加载的场景为准；新场景开始播放音频时会停止上一个场景的音频。
+
+`AudioFile` 使用相对路径时，插件依次在场景 XML 所在目录、`CatalogSpawner/Audio` 和 `menyooStuff/Audio` 中查找，因而可以复用 Menyoo 常见的音频目录结构。
+
 ## 预览图
 
 推荐按类型存放预览图：
@@ -179,6 +226,7 @@ Catalog Spawner 当前不会直接读取或修改 `ap_m.xml`。如果选择后�
 CatalogSpawner/Previews/Peds/
 CatalogSpawner/Previews/Weapons/
 CatalogSpawner/Previews/Vehicles/
+CatalogSpawner/Previews/Scenes/
 ```
 
 配置示例：
@@ -221,6 +269,7 @@ GTAVCatalogSpawner.log
 [Catalog] Loaded 2 item(s) from peds.xml
 [Catalog] Loaded 2 item(s) from weapons.xml
 [Catalog] Loaded 2 item(s) from vehicles.xml
+[Catalog] Loaded 1 item(s) from scenes.xml
 ```
 
 常见日志和处理方式：
@@ -235,6 +284,8 @@ GTAVCatalogSpawner.log
 | `Invalid ped model` | 人物模型未安装、未注册或 `spawnName` 错误。 |
 | `Invalid weapon` | 武器名称无效或 Add-On 武器未加载。 |
 | `Invalid vehicle model` | 载具模型未安装、未加载或 `spawnName` 错误。 |
+| `[Scene] Invalid Spooner XML` | `scenePath` 指向的文件不是有效的 `<SpoonerPlacements>` XML。 |
+| `[Scene] Model not found` | 场景引用的模型未安装或当前游戏版本无法加载。 |
 | `Image not found` | `preview` 指向的图片不存在，会改用默认图。 |
 
 如果某份配置在游戏已经成功加载过，之后修改成无效 XML，插件会保留该文件上一次成功加载的内存列表；首次加载即失败时，对应菜单为空。

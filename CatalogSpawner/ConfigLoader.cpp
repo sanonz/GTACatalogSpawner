@@ -39,6 +39,7 @@ std::string KindName(CatalogKind kind) {
     case CatalogKind::Ped: return "ped";
     case CatalogKind::Weapon: return "weapon";
     case CatalogKind::Vehicle: return "vehicle";
+    case CatalogKind::Scene: return "scene";
     }
     return {};
 }
@@ -48,6 +49,8 @@ void ApplyField(CatalogItem& item, const std::string& field, const std::string& 
         item.DisplayName = value;
     else if (field == "spawnName")
         item.SpawnName = value;
+    else if (field == "scenePath")
+        item.ScenePath = std::filesystem::path(std::u8string(value.begin(), value.end()));
     else if (field == "preview")
         item.PreviewPath = std::filesystem::path(std::u8string(value.begin(), value.end()));
     else if (field == "category")
@@ -91,7 +94,7 @@ bool CatalogRepository::ParseCatalog(const std::filesystem::path& path, CatalogK
     CatalogItem currentItem;
     currentItem.Kind = expectedKind;
     std::vector<CatalogItem> parsedItems;
-    std::set<std::string> spawnNames;
+    std::set<std::string> uniqueIds;
     XmlNodeType nodeType = XmlNodeType_None;
 
     while (SUCCEEDED(result) && (result = reader->Read(&nodeType)) == S_OK) {
@@ -147,16 +150,23 @@ bool CatalogRepository::ParseCatalog(const std::filesystem::path& path, CatalogK
             insideItem = false;
             currentItem.DisplayName = Utils::Trim(currentItem.DisplayName);
             currentItem.SpawnName = Utils::Trim(currentItem.SpawnName);
-            if (currentItem.DisplayName.empty() || currentItem.SpawnName.empty()) {
-                LOG_WARNING("[Catalog] Ignoring item without displayName/spawnName in {}", path.string());
+            const bool isScene = expectedKind == CatalogKind::Scene;
+            if (currentItem.DisplayName.empty() ||
+                (isScene ? currentItem.ScenePath.empty() : currentItem.SpawnName.empty())) {
+                LOG_WARNING("[Catalog] Ignoring item without displayName/{} in {}",
+                    isScene ? "scenePath" : "spawnName", path.string());
                 continue;
             }
-            const std::string dedupeKey = Utils::ToLower(currentItem.SpawnName);
-            if (!spawnNames.insert(dedupeKey).second) {
-                LOG_WARNING("[Catalog] Ignoring duplicate spawnName '{}' in {}",
-                    currentItem.SpawnName, path.string());
+            const std::string dedupeKey = Utils::ToLower(isScene
+                ? currentItem.ScenePath.generic_string()
+                : currentItem.SpawnName);
+            if (!uniqueIds.insert(dedupeKey).second) {
+                LOG_WARNING("[Catalog] Ignoring duplicate {} '{}' in {}",
+                    isScene ? "scenePath" : "spawnName", dedupeKey, path.string());
                 continue;
             }
+            if (isScene && currentItem.ScenePath.is_relative())
+                currentItem.ScenePath = dataDirectory / currentItem.ScenePath;
             if (!currentItem.PreviewPath.empty() && currentItem.PreviewPath.is_relative())
                 currentItem.PreviewPath = dataDirectory / currentItem.PreviewPath;
             parsedItems.push_back(std::move(currentItem));
@@ -194,6 +204,12 @@ bool CatalogRepository::Reload(const std::filesystem::path& dataDirectory) {
         vehicles_ = std::move(parsed);
     else
         success = false;
+
+    parsed.clear();
+    if (ParseCatalog(dataDirectory / L"scenes.xml", CatalogKind::Scene, dataDirectory, parsed))
+        scenes_ = std::move(parsed);
+    else
+        success = false;
     return success;
 }
 
@@ -207,4 +223,8 @@ const std::vector<CatalogItem>& CatalogRepository::Weapons() const {
 
 const std::vector<CatalogItem>& CatalogRepository::Vehicles() const {
     return vehicles_;
+}
+
+const std::vector<CatalogItem>& CatalogRepository::Scenes() const {
+    return scenes_;
 }

@@ -11,12 +11,14 @@ enum class CatalogKind {
     Ped,
     Weapon,
     Vehicle,
+    Scene,
 };
 
 struct CatalogItem {
     CatalogKind Kind = CatalogKind::Ped;
     std::string DisplayName;
     std::string SpawnName;
+    std::filesystem::path ScenePath;
     std::filesystem::path PreviewPath;
     std::string Category;
     std::string Description;
@@ -25,4 +27,3 @@ struct CatalogItem {
 
     Hash ModelHash() const;
 };
-
