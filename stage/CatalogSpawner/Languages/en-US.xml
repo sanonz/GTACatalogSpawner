@@ -62,4 +62,6 @@
   <text key="subtitle.scene_invalid">Couldn't read scene: {name}</text>
   <text key="subtitle.scene_loaded">Loaded {name}: {loaded} entities, {failed} failed</text>
   <text key="subtitle.scenes_unloaded">Unloaded {count} scene entities</text>
+  <text key="toast.startup.title">XModBox Spawner Ready</text>
+  <text key="toast.startup.body">Press {key} to open the menu: spawn vehicles, weapons, peds &amp; scenes</text>
 </language>

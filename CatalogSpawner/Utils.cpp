@@ -62,8 +62,7 @@ std::string Utils::GxtText(const std::string& label) {
     return localized;
 }
 
-void Utils::ShowSubtitle(const std::string& message, int duration) {
-    HUD::BEGIN_TEXT_COMMAND_PRINT("CELL_EMAIL_BCON");
+void Utils::AddTextChunks(const std::string& message) {
     constexpr size_t maxChunkLength = 99;
     size_t start = 0;
     while (start < message.size()) {
@@ -78,6 +77,11 @@ void Utils::ShowSubtitle(const std::string& message, int duration) {
         HUD::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(chunk.c_str());
         start = end;
     }
+}
+
+void Utils::ShowSubtitle(const std::string& message, int duration) {
+    HUD::BEGIN_TEXT_COMMAND_PRINT("CELL_EMAIL_BCON");
+    AddTextChunks(message);
     HUD::END_TEXT_COMMAND_PRINT(duration, true);
 }
 

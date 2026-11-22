@@ -80,6 +80,8 @@ const StringMap kEnglishStrings = {
     { "subtitle.scene_invalid", "Couldn't read scene: {name}" },
     { "subtitle.scene_loaded", "Loaded {name}: {loaded} entities, {failed} failed" },
     { "subtitle.scenes_unloaded", "Unloaded {count} scene entities" },
+    { "toast.startup.title", "XModBox Spawner Ready" },
+    { "toast.startup.body", "Press {key} to open the menu: spawn vehicles, weapons, peds & scenes" },
 };
 
 std::set<std::string> Placeholders(const std::string& value) {

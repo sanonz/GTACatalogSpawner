@@ -115,6 +115,7 @@
     <ClCompile Include="SceneXml.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Spawner.cpp" />
+    <ClCompile Include="StartupToast.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -131,6 +132,7 @@
     <ClInclude Include="SceneXml.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Spawner.h" />
+    <ClInclude Include="StartupToast.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="..\thirdparty\jpegsize.h" />

@@ -11,6 +11,7 @@ public:
 
     std::string Language = "en-US";
     bool EnterSpawnedVehicle = true;
+    bool ShowStartupToast = true;
 
 private:
     std::filesystem::path path_;

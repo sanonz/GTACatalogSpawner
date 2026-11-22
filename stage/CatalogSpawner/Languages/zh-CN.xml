@@ -62,4 +62,6 @@
   <text key="subtitle.scene_invalid">无法读取场景：{name}</text>
   <text key="subtitle.scene_loaded">已加载{name}：成功 {loaded} 个，失败 {failed} 个</text>
   <text key="subtitle.scenes_unloaded">已卸载 {count} 个场景实体</text>
+  <text key="toast.startup.title">模力盒（XModBox）生成器已就绪</text>
+  <text key="toast.startup.body">按{key}打开菜单，一键生成载具、武器、人物与场景</text>
 </language>

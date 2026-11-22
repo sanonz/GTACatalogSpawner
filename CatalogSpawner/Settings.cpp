@@ -18,6 +18,7 @@ void Settings::Load() {
         LOG_WARNING("Settings file is unavailable; defaults will be used: {}", path_.string());
     Language = ini.GetValue("OPTIONS", "Language", "en-US");
     EnterSpawnedVehicle = ini.GetBoolValue("OPTIONS", "EnterSpawnedVehicle", true);
+    ShowStartupToast = ini.GetBoolValue("OPTIONS", "ShowStartupToast", true);
 }
 
 void Settings::Save() const {
@@ -26,6 +27,7 @@ void Settings::Save() const {
     ini.LoadFile(path_.string().c_str());
     ini.SetValue("OPTIONS", "Language", Language.c_str());
     ini.SetBoolValue("OPTIONS", "EnterSpawnedVehicle", EnterSpawnedVehicle);
+    ini.SetBoolValue("OPTIONS", "ShowStartupToast", ShowStartupToast);
     if (ini.SaveFile(path_.string().c_str()) < 0)
         LOG_ERROR("Failed to save settings: {}", path_.string());
 }

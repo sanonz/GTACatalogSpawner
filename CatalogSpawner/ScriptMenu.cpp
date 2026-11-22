@@ -8,6 +8,7 @@
 #include "SceneLoader.h"
 #include "Settings.h"
 #include "Spawner.h"
+#include "StartupToast.h"
 #include "Utils.h"
 #include "Version.h"
 
@@ -320,6 +321,7 @@ void UpdateSettingsMenu() {
 }
 
 void OnMenuOpen() {
+    StartupToast::Dismiss();
     gScenePreflightCache.clear();
     ReloadUserData();
 }

@@ -8,6 +8,7 @@
 #include "ScriptMenu.h"
 #include "SceneLoader.h"
 #include "Settings.h"
+#include "StartupToast.h"
 
 #include <inc/main.h>
 
@@ -34,6 +35,7 @@ void InitializeScript() {
     gMenu.SetFiles((Paths::DataDirectory() / L"settings_menu.ini").string());
     gMenu.ReadSettings();
     gMenu.Initialize();
+    StartupToast::Reset();
     LOG_INFO("Initialization finished");
 }
 
@@ -42,6 +44,7 @@ void ScriptMain() {
     while (true) {
         SceneLoader::Tick();
         UpdateMenu();
+        StartupToast::Tick();
         WAIT(0);
     }
 }
