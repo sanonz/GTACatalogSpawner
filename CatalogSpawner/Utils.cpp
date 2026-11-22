@@ -53,6 +53,21 @@ std::string Utils::WideToUtf8(const wchar_t* value, unsigned int length) {
     return result;
 }
 
+std::wstring Utils::Utf8ToWide(const std::string& value) {
+    if (value.empty())
+        return {};
+    const int required = MultiByteToWideChar(CP_UTF8, 0, value.data(),
+        static_cast<int>(value.size()), nullptr, 0);
+    if (required <= 0)
+        return {};
+    std::wstring result(required, L'\0');
+    if (MultiByteToWideChar(CP_UTF8, 0, value.data(), static_cast<int>(value.size()),
+        result.data(), required) <= 0) {
+        return {};
+    }
+    return result;
+}
+
 std::string Utils::GxtText(const std::string& label) {
     if (label.empty() || label == "NULL")
         return {};

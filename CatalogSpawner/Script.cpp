@@ -9,6 +9,7 @@
 #include "SceneLoader.h"
 #include "Settings.h"
 #include "StartupToast.h"
+#include "TeleportStore.h"
 
 #include <inc/main.h>
 
@@ -22,11 +23,13 @@ void ReloadUserData() {
         gSettings.Save();
     }
     gCatalogs.Reload(Paths::DataDirectory());
+    gTeleports.Load();
 }
 
 void InitializeScript() {
     Paths::EnsureDataDirectories();
     gSettings.SetPath(Paths::DataDirectory() / L"settings.ini");
+    gTeleports.SetPath(Paths::DataDirectory() / L"teleports.xml");
     gImages.Initialize(Paths::DataDirectory());
     ReloadUserData();
 

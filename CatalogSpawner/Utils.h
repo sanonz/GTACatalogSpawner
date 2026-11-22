@@ -9,6 +9,7 @@ Hash Joaat(std::string value);
 std::string Trim(std::string value);
 std::string ToLower(std::string value);
 std::string WideToUtf8(const wchar_t* value, unsigned int length);
+std::wstring Utf8ToWide(const std::string& value);
 std::string GxtText(const std::string& label);
 void AddTextChunks(const std::string& message);
 void ShowSubtitle(const std::string& message, int duration = 2500);

@@ -116,6 +116,9 @@
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Spawner.cpp" />
     <ClCompile Include="StartupToast.cpp" />
+    <ClCompile Include="Teleporter.cpp" />
+    <ClCompile Include="TeleportStore.cpp" />
+    <ClCompile Include="TextInput.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +136,9 @@
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Spawner.h" />
     <ClInclude Include="StartupToast.h" />
+    <ClInclude Include="Teleporter.h" />
+    <ClInclude Include="TeleportStore.h" />
+    <ClInclude Include="TextInput.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="..\thirdparty\jpegsize.h" />

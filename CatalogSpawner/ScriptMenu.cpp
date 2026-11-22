@@ -9,13 +9,18 @@
 #include "Settings.h"
 #include "Spawner.h"
 #include "StartupToast.h"
+#include "Teleporter.h"
+#include "TeleportStore.h"
 #include "Utils.h"
 #include "Version.h"
 
+#include <GTAVMenuBase/menukeyboard.h>
 #include <inc/natives.h>
 
 #include <algorithm>
+#include <cmath>
 #include <format>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -23,6 +28,10 @@
 namespace {
 std::unordered_map<std::string, SceneLoader::PreflightResult>
     gScenePreflightCache;
+Vector3 gManualCoords{};
+bool gManualCoordsInitialized = false;
+bool gAutoGroundZ = true;
+bool gPrevDeleteKeyDown = false;
 
 std::string T(const char* key) {
     return gLanguage.Text(key);
@@ -226,7 +235,207 @@ void UpdateMainMenu() {
     gMenu.MenuOption(T("menu.main.weapons"), "weaponsmenu");
     gMenu.MenuOption(T("menu.main.vehicles"), "vehiclesmenu");
     gMenu.MenuOption(T("menu.main.scenes"), "scenesmenu");
+    gMenu.MenuOption(T("menu.main.teleports"), "teleportmenu");
     gMenu.MenuOption(T("menu.main.settings"), "settingsmenu");
+}
+
+std::vector<std::string> BuildTeleportDetails(const SavedLocation& location) {
+    std::vector<std::string> details;
+    details.push_back(gLanguage.Format("info.teleport.x", {
+        { "value", std::format("{:.2f}", location.Position.x) },
+    }));
+    details.push_back(gLanguage.Format("info.teleport.y", {
+        { "value", std::format("{:.2f}", location.Position.y) },
+    }));
+    details.push_back(gLanguage.Format("info.teleport.z", {
+        { "value", std::format("{:.2f}", location.Position.z) },
+    }));
+    if (location.HasHeading) {
+        details.push_back(gLanguage.Format("info.teleport.heading", {
+            { "value", std::format("{:.1f}", location.Heading) },
+        }));
+    }
+    if (!location.Zone.empty()) {
+        details.push_back(gLanguage.Format("info.teleport.zone", {
+            { "value", location.Zone },
+        }));
+    }
+    details.emplace_back(" ");
+    details.push_back(T("info.teleport.controls"));
+    details.emplace_back(" ");
+    return details;
+}
+
+bool PromptCoordAxis(const char* titleKey, float& value) {
+    const auto input = Teleporter::PromptTextInput(T(titleKey), std::format("{:.2f}", value), 24);
+    gPrevDeleteKeyDown = NativeMenu::IsKeyDown(VK_DELETE);
+    if (!input.has_value())
+        return false;
+
+    float parsed = 0.0f;
+    if (!Teleporter::ParseFloat(*input, parsed)) {
+        Utils::ShowSubtitle(T("subtitle.teleport_invalid_input"));
+        return false;
+    }
+    value = parsed;
+    return true;
+}
+
+int UpdateTeleportMenu(bool deleteJustPressed) {
+    const auto& initialLocations = gTeleports.Locations();
+    gMenu.Title(T("menu.teleport.title"));
+    gMenu.Subtitle(gLanguage.Format("menu.teleport.saved_count", {
+        { "count", std::to_string(initialLocations.size()) },
+    }));
+
+    int renderedOptions = 0;
+    ++renderedOptions;
+    if (gMenu.MenuOption(T("menu.teleport.manual"), "teleportcoordsmenu",
+        { T("menu.teleport.manual.detail") })) {
+        return renderedOptions;
+    }
+
+    ++renderedOptions;
+    if (gMenu.Option(T("menu.teleport.save_current"),
+        { T("menu.teleport.save_current.detail") })) {
+        SavedLocation captured = Teleporter::CaptureCurrentLocation();
+        const std::string defaultName = gTeleports.NextDefaultName(
+            captured.Name, T("menu.teleport.default_name"));
+        const auto input = Teleporter::PromptTextInput(
+            T("input.title.location_name"), defaultName, 64);
+        gPrevDeleteKeyDown = NativeMenu::IsKeyDown(VK_DELETE);
+        if (input.has_value()) {
+            const std::string trimmed = Utils::Trim(*input);
+            captured.Name = trimmed.empty() ? defaultName : trimmed;
+            if (gTeleports.Add(captured)) {
+                Utils::ShowSubtitle(gLanguage.Format("subtitle.teleport_saved", {
+                    { "name", captured.Name },
+                }));
+            }
+            else {
+                Utils::ShowSubtitle(T("subtitle.teleport_save_failed"));
+            }
+        }
+    }
+
+    ++renderedOptions;
+    if (gMenu.Option(T("menu.teleport.waypoint"),
+        { T("menu.teleport.waypoint.detail") })) {
+        Teleporter::TeleportToWaypoint();
+    }
+
+    const auto& locations = gTeleports.Locations();
+    if (locations.empty()) {
+        ++renderedOptions;
+        gMenu.Option(T("menu.teleport.empty"), { T("menu.teleport.empty.detail") });
+        return renderedOptions;
+    }
+
+    int deleteIndex = -1;
+    for (size_t index = 0; index < locations.size(); ++index) {
+        const auto& location = locations[index];
+        bool highlighted = false;
+        ++renderedOptions;
+        const bool selected = gMenu.OptionPlus(location.Name, {}, &highlighted,
+            nullptr, nullptr, T("info.teleport.title"),
+            { T("menu.teleport.saved_item.detail") });
+        if (highlighted) {
+            gMenu.OptionPlusPlus(BuildTeleportDetails(location), T("info.teleport.title"));
+            if (deleteJustPressed)
+                deleteIndex = static_cast<int>(index);
+        }
+        if (selected) {
+            const std::optional<float> heading = location.HasHeading
+                ? std::optional<float>(location.Heading)
+                : std::nullopt;
+            Teleporter::TeleportTo(location.Position, heading, false, location.Name);
+        }
+    }
+
+    if (deleteIndex >= 0) {
+        const std::string removedName = locations[static_cast<size_t>(deleteIndex)].Name;
+        const bool wasLast = (static_cast<size_t>(deleteIndex) + 1 == locations.size());
+        const bool hadMultiple = (locations.size() > 1);
+        if (gTeleports.RemoveAt(static_cast<size_t>(deleteIndex))) {
+            AUDIO::PLAY_SOUND_FRONTEND(-1, "BACK", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0);
+            if (wasLast && hadMultiple)
+                gMenu.PreviousOption();
+            Utils::ShowSubtitle(gLanguage.Format("subtitle.teleport_deleted", {
+                { "name", removedName },
+            }));
+        }
+        else {
+            Utils::ShowSubtitle(T("subtitle.teleport_save_failed"));
+        }
+    }
+
+    return renderedOptions;
+}
+
+void UpdateTeleportCoordsMenu() {
+    if (!gManualCoordsInitialized) {
+        gManualCoords = Teleporter::CurrentPosition();
+        gManualCoordsInitialized = true;
+    }
+
+    gMenu.Title(T("menu.teleport.manual_title"));
+    gMenu.Subtitle(std::format("{:.1f}, {:.1f}, {:.1f}",
+        gManualCoords.x, gManualCoords.y, gManualCoords.z));
+
+    if (gMenu.Option(T("menu.teleport.input_xyz"),
+        { T("menu.teleport.input_xyz.detail") })) {
+        const std::string initial = std::format("{:.2f}, {:.2f}, {:.2f}",
+            gManualCoords.x, gManualCoords.y, gManualCoords.z);
+        const auto input = Teleporter::PromptTextInput(
+            T("input.title.coords"), initial, 64);
+        gPrevDeleteKeyDown = NativeMenu::IsKeyDown(VK_DELETE);
+        if (input.has_value()) {
+            Vector3 parsed{};
+            if (Teleporter::ParseCoordinates(*input, parsed)) {
+                gManualCoords = parsed;
+                Utils::ShowSubtitle(gLanguage.Format("subtitle.teleport_coords_updated", {
+                    { "x", std::format("{:.2f}", gManualCoords.x) },
+                    { "y", std::format("{:.2f}", gManualCoords.y) },
+                    { "z", std::format("{:.2f}", gManualCoords.z) },
+                }));
+            }
+            else {
+                Utils::ShowSubtitle(T("subtitle.teleport_invalid_input"));
+            }
+        }
+    }
+
+    gMenu.FloatOptionCb(T("menu.teleport.coord_x"), gManualCoords.x,
+        -20000.0f, 20000.0f, 1.0f,
+        [](float& value) { return PromptCoordAxis("input.title.coord_x", value); },
+        { T("menu.teleport.coord.detail") });
+    gMenu.FloatOptionCb(T("menu.teleport.coord_y"), gManualCoords.y,
+        -20000.0f, 20000.0f, 1.0f,
+        [](float& value) { return PromptCoordAxis("input.title.coord_y", value); },
+        { T("menu.teleport.coord.detail") });
+    gMenu.FloatOptionCb(T("menu.teleport.coord_z"), gManualCoords.z,
+        -5000.0f, 10000.0f, 1.0f,
+        [](float& value) { return PromptCoordAxis("input.title.coord_z", value); },
+        { T("menu.teleport.coord.detail") });
+
+    gMenu.BoolOption(T("menu.teleport.auto_ground_z"), gAutoGroundZ,
+        { T("menu.teleport.auto_ground_z.detail") });
+
+    if (gMenu.Option(T("menu.teleport.use_current"),
+        { T("menu.teleport.use_current.detail") })) {
+        gManualCoords = Teleporter::CurrentPosition();
+        Utils::ShowSubtitle(gLanguage.Format("subtitle.teleport_coords_updated", {
+            { "x", std::format("{:.2f}", gManualCoords.x) },
+            { "y", std::format("{:.2f}", gManualCoords.y) },
+            { "z", std::format("{:.2f}", gManualCoords.z) },
+        }));
+    }
+
+    if (gMenu.Option(T("menu.teleport.go"),
+        { T("menu.teleport.go.detail") })) {
+        const bool probeGround = gAutoGroundZ && std::fabs(gManualCoords.z) < 0.001f;
+        Teleporter::TeleportTo(gManualCoords, std::nullopt, probeGround);
+    }
 }
 
 void UpdateScenesMenu() {
@@ -323,6 +532,7 @@ void UpdateSettingsMenu() {
 void OnMenuOpen() {
     StartupToast::Dismiss();
     gScenePreflightCache.clear();
+    gPrevDeleteKeyDown = NativeMenu::IsKeyDown(VK_DELETE);
     ReloadUserData();
 }
 
@@ -331,10 +541,14 @@ void OnMenuExit() {
 
 void UpdateMenu() {
     gMenu.CheckKeys();
+    const bool deleteDown = gMenu.IsThisOpen() && NativeMenu::IsKeyDown(VK_DELETE);
+    const bool deleteJustPressed = deleteDown && !gPrevDeleteKeyDown;
+    gPrevDeleteKeyDown = deleteDown;
+
     int footerOptionCount = 0;
     if (gMenu.CurrentMenu("mainmenu")) {
         UpdateMainMenu();
-        footerOptionCount = 5;
+        footerOptionCount = 6;
     }
     if (gMenu.CurrentMenu("pedsmenu")) {
         UpdateCatalogMenu("menu.peds.title", gCatalogs.Peds());
@@ -357,6 +571,13 @@ void UpdateMenu() {
         UpdateSceneSessionsMenu();
         footerOptionCount = std::max(1,
             static_cast<int>(SceneLoader::ActiveSessions().size()) + 1);
+    }
+    if (gMenu.CurrentMenu("teleportmenu")) {
+        footerOptionCount = UpdateTeleportMenu(deleteJustPressed);
+    }
+    if (gMenu.CurrentMenu("teleportcoordsmenu")) {
+        UpdateTeleportCoordsMenu();
+        footerOptionCount = 7;
     }
     if (gMenu.CurrentMenu("settingsmenu")) {
         UpdateSettingsMenu();
