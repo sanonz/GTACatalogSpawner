@@ -41,6 +41,49 @@ CatalogSpawner/
 The prepared data directory is under `stage/CatalogSpawner`. Press F6 or enter
 the `catalogspawner` cheat to open the menu. ScriptHookV is required.
 
+## Convert preview PNGs
+
+On Windows, the standalone `tools/ConvertTo-NonInterlacedPng.ps1` script converts
+a static PNG to non-interlaced PNG using Windows PowerShell 5.1 or PowerShell 7.
+No additional packages are required.
+
+```powershell
+.\tools\ConvertTo-NonInterlacedPng.ps1 -InputPath "C:\Images\preview.png"
+.\tools\ConvertTo-NonInterlacedPng.ps1 "C:\Images\preview.png" "C:\Output\preview.png"
+```
+
+If the output path is omitted, the result is saved beside the input as
+`preview.non-interlaced.png`. Missing output directories are created; existing
+files are never overwritten. The script preserves dimensions, transparency,
+and PNG metadata, and verifies every decoded pixel before writing. Animated or
+signed PNGs, and pixel formats/palettes the Windows encoder cannot preserve,
+are rejected rather than silently changed. Other image formats are not supported.
+
+## Convert progressive JPEGs
+
+`tools/ConvertTo-BaselineJpeg.ps1` converts an 8-bit progressive JPEG to baseline
+JPEG without re-quantizing its DCT coefficients. Baseline input is also accepted.
+It uses [libjpeg-turbo's jpegtran](https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/doc/usage.txt#L557)
+with `-copy all -optimize` to retain JPEG metadata without another lossy encode.
+
+Download [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo/releases)
+and put its `bin` directory on `PATH`, place `jpegtran.exe` and its accompanying
+DLLs beside the script, or specify the executable explicitly:
+
+```powershell
+.\tools\ConvertTo-BaselineJpeg.ps1 "C:\Images\preview.jpg"
+.\tools\ConvertTo-BaselineJpeg.ps1 "C:\Images\preview.jpg" "C:\Output\preview.jpeg"
+.\tools\ConvertTo-BaselineJpeg.ps1 -InputPath "C:\Images\preview.jpg" -JpegtranPath "C:\Tools\libjpeg-turbo\bin\jpegtran.exe"
+```
+
+The default output is `preview.baseline.jpg` beside the input. Existing files
+are never overwritten, missing output directories are created, and failed
+conversions leave no temporary output. The script checks the output's baseline
+SOF0 marker and unchanged dimensions/component count before saving. JPEGs that
+cannot be represented as baseline without changing quantization, and non-8-bit
+or arithmetic-coded JPEGs, are rejected. PowerShell 5.1 and 7 are supported;
+the script does not download or install dependencies automatically.
+
 ## Catalog format
 
 完整中文配置说明请参阅

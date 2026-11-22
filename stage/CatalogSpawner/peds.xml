@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <catalog type="ped">
   <item>
-    <displayName>Vito Mafia</displayName>
-    <spawnName>vito_mafia</spawnName>
-    <preview>Previews/Peds/vito_mafia.png</preview>
+    <displayName>Michael</displayName>
+    <spawnName>player_zero</spawnName>
+    <preview>Previews/Peds/michael.png</preview>
     <category>Male</category>
-    <description>Add-on ped</description>
+    <description>Michael De Santa</description>
   </item>
   <item>
-    <displayName>Superman</displayName>
-    <spawnName>superman</spawnName>
-    <preview>Previews/Peds/superman.png</preview>
+    <displayName>Franklin</displayName>
+    <spawnName>player_one</spawnName>
+    <preview>Previews/Peds/franklin.png</preview>
     <category>Male</category>
-    <description>Add-on ped</description>
+    <description>Franklin Clinton</description>
+  </item>
+  <item>
+    <displayName>Trevor</displayName>
+    <spawnName>player_two</spawnName>
+    <preview>Previews/Peds/trevor.png</preview>
+    <category>Male</category>
+    <description>Trevor Philips</description>
   </item>
 </catalog>
 
